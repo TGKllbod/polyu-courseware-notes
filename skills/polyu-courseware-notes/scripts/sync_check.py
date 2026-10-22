@@ -20,8 +20,44 @@ import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-# scripts → polyu-courseware-notes → skills → .claude → 工作区根
-WS = os.path.abspath(os.path.join(HERE, "..", "..", "..", ".."))
+
+
+def _find_ws() -> str:
+    """确定工作区根目录。优先级：POLYU_HOME > 从 cwd 向上找 > 脚本位置回退。
+
+    不能只靠脚本位置：skill 被装到 ~/.claude/skills/ 时，向上 4 层会变成家目录。
+    """
+    env = os.environ.get("POLYU_HOME")
+    if env:
+        return os.path.abspath(os.path.expanduser(env))
+    marks = ["课程总览.md", "DDL汇总.md", "复习笔记.md"]
+    here = os.getcwd()
+    for d in [here] + [os.path.dirname(p) for p in _ancestors(here)]:
+        if any(os.path.exists(os.path.join(d, m)) for m in marks):
+            return d
+        # 也认「课程文件夹」形态：根下某个子目录里有 复习笔记.md
+        try:
+            for sub in os.listdir(d):
+                if os.path.exists(os.path.join(d, sub, "复习笔记.md")):
+                    return d
+        except OSError:
+            pass
+    # 回退：假定脚本在 <ws>/.claude/skills/<skill>/scripts/
+    return os.path.abspath(os.path.join(HERE, "..", "..", "..", ".."))
+
+
+def _ancestors(path):
+    p = os.path.abspath(path)
+    out = []
+    while True:
+        parent = os.path.dirname(p)
+        if parent == p:
+            return out
+        out.append(parent)
+        p = parent
+
+
+WS = _find_ws()
 
 # 需要成对维护的（md → docx）
 PAIRS = [

@@ -82,6 +82,7 @@ cw check
 | `cw check [--fix]` | 同步检查（md 比 docx 新）＋ 缩写检查 |
 | `cw render <deck.pptx>` | LibreOffice 转 PDF，强制隔离用户配置目录 |
 | `cw ocr <图片>` | macOS 走 Vision（自动编译）；其他平台走 Tesseract |
+| `cw serve [--port 8765]` | 本地 Web 界面：拖入课件 → 提取 → 生成 docx → 检查（只监听 127.0.0.1） |
 
 `--root` 写在子命令前后都可以：`cw --root X init` 与 `cw init --root X` 等价。
 工作区根目录的解析顺序：`--root` → `$POLYU_HOME` → `~/PolyU`。
@@ -106,6 +107,7 @@ cw check
 
 ```
 cw.py                          命令行入口（跨平台）
+web.py                         本地 Web 界面（标准库 http.server，无前端依赖）
 pyproject.toml                 pip install -e . 后得到 cw 命令
 skills/
   polyu-courseware-notes/
@@ -151,7 +153,7 @@ skills/
 
 - [x] 规则与脚本（当前版本）
 - [x] CLI：`cw init` / `doctor` / `ingest` / `notes` / `check` / `render` / `ocr`（含 Windows 适配）
-- [ ] 本地 Web 界面：拖入课件 → 自动提取 → 预览笔记 → 导出 docx
+- [x] 本地 Web 界面：`cw serve` — 拖入课件 → 提取 → 生成 docx → 检查
 - [ ] 模板化：不同学校/学科的 `复习笔记` 模板
 
 ## 隐私与版权（重要）

@@ -11,6 +11,7 @@
   check    跑同步检查与缩写检查
   render   用 LibreOffice 把 pptx/docx 转成 PDF（用于实际查看排版）
   ocr      图片文字识别（macOS 用 Vision，其他平台用 tesseract）
+  serve    启动本地 Web 界面（拖入课件 → 提取 → 生成 docx）
 
 示例:
   cw init --root ~/PolyU
@@ -484,6 +485,19 @@ def cmd_ocr(a: argparse.Namespace) -> int:
     return 1
 
 
+def cmd_serve(a: argparse.Namespace) -> int:
+    root = resolve_root(a.root)
+    if not root.exists():
+        bad(f"工作区不存在：{root}（先跑 cw init）")
+        return 1
+    try:
+        import web  # noqa: PLC0415  （与 cw.py 同目录）
+    except ImportError:
+        bad("找不到 web.py —— 它需要与 cw.py 放在同一目录")
+        return 1
+    return web.serve(root, a.host, a.port)
+
+
 # ---------------------------------------------------------------- main
 
 def main(argv: list[str] | None = None) -> int:
@@ -527,6 +541,11 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("file", help="pptx / docx / odt")
     s.add_argument("--out", help="输出目录（默认源文件旁的 .render/）")
     s.set_defaults(func=cmd_render)
+
+    s = sub.add_parser("serve", parents=[common], help="启动本地 Web 界面")
+    s.add_argument("--port", type=int, default=8765)
+    s.add_argument("--host", default="127.0.0.1")
+    s.set_defaults(func=cmd_serve)
 
     s = sub.add_parser("ocr", parents=[common], help="图片文字识别")
     s.add_argument("image")

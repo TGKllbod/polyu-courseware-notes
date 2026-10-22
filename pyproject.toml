@@ -21,4 +21,4 @@ dependencies = [
 cw = "cw:main"
 
 [tool.setuptools]
-py-modules = ["cw"]
+py-modules = ["cw", "web"]
