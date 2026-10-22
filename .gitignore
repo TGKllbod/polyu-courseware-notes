@@ -1,0 +1,20 @@
+# 个人工作区数据（不要提交）
+*.pptx
+*.pdf
+*.docx
+!templates/**/*.docx
+.render/
+.pylibs/
+__pycache__/
+*.pyc
+.DS_Store
+.~*
+# 个人数据
+**/成绩*
+**/学号*
+
+# 本地测试工作区
+.testws/
+
+# CI 日志缓存
+.ghcache/

@@ -1,0 +1,34 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  smoke:
+    name: ${{ matrix.os }} / py${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ["3.9", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: 安装
+        run: pip install -e .
+      - name: 帮助可用
+        run: cw --help
+      - name: 环境自检（缺 LibreOffice / OCR 只警告，不算失败）
+        run: cw doctor
+      - name: 建工作区并拆分
+        shell: bash
+        run: |
+          cw init --root ./tmp --courses "ABCD1234:Demo"
+          printf '## 1. Lecture 1 — Demo\n\n### 1.1 小节\n\n- 要点\n' > "./tmp/ABCD1234_Demo/复习笔记.md"
+          cw notes ABCD1234_Demo --root ./tmp
+          ls ./tmp/ABCD1234_Demo/*.docx
