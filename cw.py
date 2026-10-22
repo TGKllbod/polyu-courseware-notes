@@ -16,7 +16,7 @@
   cw init --root ~/PolyU
   cw doctor
   cw ingest ~/Downloads/Lecture3.pptx
-  cw notes APSS5202 --lecture 7
+  cw notes EFGH5678 --lecture 7
   cw check
   cw render deck.pptx
 """
@@ -310,7 +310,7 @@ def extract_summary(dest: Path, outdir: Path) -> list[str]:
 
 # ---------------------------------------------------------------- ingest
 
-# 课程代码两种常见形态：APSS5201（字母+4位数字）、HTI5T04（字母+数字+字母+数字）。
+# 课程代码两种常见形态：ABCD1234（字母+4位数字）、MNOP3456（字母+数字+字母+数字）。
 # 不用 \b——_ 是词字符，AB CD1234_Lecture5 这类会判成无边界。
 CODE_RE = re.compile(r"(?<![A-Za-z0-9])([A-Z]{2,4}\d[A-Z]\d{2,3}|[A-Z]{2,6}\d{3,4})(?![0-9])")
 

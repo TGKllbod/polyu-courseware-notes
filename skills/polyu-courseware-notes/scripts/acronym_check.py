@@ -10,7 +10,7 @@
 
 用法:
     python3 acronym_check.py <文件或目录> [<更多路径>...]
-    python3 acronym_check.py ../../APSS5521_*/复习笔记.md
+    python3 acronym_check.py ../../IJKL9012_*/复习笔记.md
 """
 import os
 import re
@@ -20,7 +20,8 @@ import sys
 SAFE = {
     'HK', 'US', 'UK', 'UN', 'EU', 'AI', 'PDF', 'PPT', 'PPTX', 'DDL', 'GDP', 'GNP', 'HDI',
     'NGO', 'APA', 'OECD', 'ILO', 'WHO', 'WTO', 'IMF', 'TV', 'PC', 'URL', 'OK', 'ID', 'AR',
-    'APSS', 'HTI', 'MASPSD', 'H0', 'H1', 'H2', 'H3', 'S1', 'S2', 'PhD', 'Dr', 'Prof',
+    'ABCD', 'EFGH', 'IJKL', 'MNOP', 'QRST',  # 占位课程代码前缀
+    'H0', 'H1', 'H2', 'H3', 'S1', 'S2', 'PhD', 'Dr', 'Prof',
     'W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W10', 'W11', 'W12', 'W13',
     # 提取脚本的输出标记（不是缩写，出现在关于 extract_pptx.py 的说明文字里）
     'TABLE', 'NOTES', 'SLIDE',
@@ -44,7 +45,7 @@ NOT_ACRONYM = {
     'REASON', 'NAME', 'TOOL', 'SERVICE', 'TITLE',
 
     "NEXT",          # 讲稿的翻页提示词，非缩写
-    "FOR", "WOMEN",  # 全大写英文标题里的普通词（APSS5521 L7 p17「DEVELOPMENT WORKING FOR WOMEN」），非缩写
+    "FOR", "WOMEN",  # 全大写英文标题里的普通词（IJKL9012 L7 p17「DEVELOPMENT WORKING FOR WOMEN」），非缩写
     'NOT', 'NO', 'MAY', 'AND', 'OR', 'ONE', 'TWO', 'TOO', 'STEP', 'PART', 'AND', 'ALL',
     'THE', 'II', 'III', 'IV', 'V', 'VI', 'FIRST', 'SECOND', 'THIRD', 'MUST', 'YES', 'ONLY',
     'BINARY', 'REALITY', 'POLICY', 'DATA', 'METHODS', 'MODEL', 'CASES', 'KEY', 'OCR_HINT',

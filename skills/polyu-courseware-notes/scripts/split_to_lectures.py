@@ -6,11 +6,11 @@
 
 用法:
     python3 split_to_lectures.py <复习笔记.md> [--keep-single] [--lecture-markers "regex"]
-    python3 split_to_lectures.py <复习笔记.md> --prefix APSS502_
+    python3 split_to_lectures.py <复习笔记.md> --prefix QRST7890_
 默认按标题行定位讲边界，如:  ## 4. Lecture 1 — ...   /   ## 5. Lecture 2 — ...
 若某门课的 md 未使用 "Lecture N" 标题，用 --lecture-markers 传入自定义正则。
 输出: 与 md 同目录下的 复习笔记-第N讲.docx（N=该讲在课件中的讲号）。
-命名约定: 成品必须带课程代码前缀（如 APSS502_复习笔记-第1讲.docx），
+命名约定: 成品必须带课程代码前缀（如 QRST7890_复习笔记-第1讲.docx），
 故跑本脚本时请一律加 --prefix <课程代码>_，否则会生成不带前缀的重复文件。
 """
 import re

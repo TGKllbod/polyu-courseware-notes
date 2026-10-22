@@ -32,11 +32,11 @@ PAIRS = [
     ("AI使用红线速查.md", "AI使用红线速查.docx"),
 ]
 COURSES = [
-    "APSS502_Social_Policy_Analysis_and_Social_Accountability",
-    "APSS5201_Policy_Research_Method",
-    "APSS5202_Comparative_Social_Policy_and_Social_Development",
-    "APSS5521_Theory_and_Practice_of_Social_Development",
-    "HTI5T04_Academic_Integrity_and_Ethics",
+    "QRST7890_Social_Policy_Analysis_and_Social_Accountability",
+    "ABCD1234_Policy_Research_Method",
+    "EFGH5678_Comparative_Social_Policy_and_Social_Development",
+    "IJKL9012_Theory_and_Practice_of_Social_Development",
+    "MNOP3456_Academic_Integrity_and_Ethics",
 ]
 for c in COURSES:
     code = c.split("_")[0]
