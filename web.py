@@ -12,13 +12,14 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-CONSOLE = """<!DOCTYPE html>
+CONSOLE = r"""<!DOCTYPE html>
 <html lang="zh"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>cw — 课程资料</title>
@@ -50,6 +51,26 @@ CONSOLE = """<!DOCTYPE html>
   pre{background:#111;color:#e8e8e8;padding:12px 14px;border-radius:8px;font-size:12.5px;overflow:auto;max-height:300px;margin:10px 0 0}
   select{font:inherit;font-size:13px;padding:6px 8px;border-radius:7px;border:1px solid var(--line);background:#fff}
   .empty{color:var(--muted);padding:20px 0}
+  .editor{display:none;background:#fff;border:1px solid var(--line);border-radius:10px;margin-bottom:14px}
+  .editor.open{display:block}
+  .editor .bar{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--line)}
+  .editor .bar strong{font-size:14px}
+  .panes{display:grid;grid-template-columns:1fr 1fr;gap:0;min-height:420px}
+  @media(max-width:820px){.panes{grid-template-columns:1fr}}
+  .panes textarea{width:100%;height:420px;border:0;border-right:1px solid var(--line);padding:14px 16px;
+    font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;resize:vertical;outline:none}
+  .preview{padding:14px 18px;overflow:auto;max-height:420px;font-size:14px}
+  .preview h3,.preview h4,.preview h5{margin:14px 0 6px;line-height:1.35}
+  .preview h3{font-size:17px} .preview h4{font-size:15px} .preview h5{font-size:14px;color:#444}
+  .preview p{margin:6px 0}
+  .preview ul,.preview ol{margin:6px 0 6px 20px;padding:0}
+  .preview li{margin:3px 0}
+  .preview code{background:#f2f2f2;padding:1px 5px;border-radius:4px;font-size:12.5px}
+  .preview blockquote{margin:8px 0;padding:6px 12px;border-left:3px solid var(--line);color:#555;background:#fbfbfb}
+  .preview table{border-collapse:collapse;margin:10px 0;font-size:13px;width:100%}
+  .preview th,.preview td{border:1px solid var(--line);padding:5px 9px;text-align:left;vertical-align:top}
+  .preview th{background:#f7f7f7}
+  .preview hr{border:0;border-top:1px solid var(--line);margin:14px 0}
 </style></head><body>
 <header>
   <h1>课程资料</h1>
@@ -66,6 +87,20 @@ CONSOLE = """<!DOCTYPE html>
     </div>
     <div id="drop" style="margin-top:12px">把课件拖到这里（pptx / pdf / docx）</div>
     <pre id="uplog" hidden></pre>
+  </div>
+  <div class="editor" id="editor">
+    <div class="bar">
+      <strong id="edTitle">复习笔记.md</strong>
+      <span class="tag" id="edMeta"></span>
+      <span class="grow"></span>
+      <span id="edMsg" class="sub"></span>
+      <button class="primary" id="edSave">保存</button>
+      <button id="edClose">关闭</button>
+    </div>
+    <div class="panes">
+      <textarea id="edText" spellcheck="false"></textarea>
+      <div class="preview" id="edPreview"></div>
+    </div>
   </div>
   <div id="courses"></div>
 </main>
@@ -87,6 +122,7 @@ async function load(){
         <span class="tag">${c.files} 个文件</span>
         <span class="tag ${c.notes_md?'ok':'bad'}">${c.notes_md?'有 复习笔记.md':'缺 复习笔记.md'}</span>
         <span class="grow"></span>
+        <button data-act="edit" ${c.notes_md?'':'disabled'}>打开笔记</button>
         <button data-act="notes" ${c.notes_md?'':'disabled'}>生成 docx</button>
         <button data-act="check">检查</button>
       </div>
@@ -101,6 +137,7 @@ async function load(){
 async function act(btn){
   const dir = btn.closest('[data-dir]').dataset.dir;
   const kind = btn.dataset.act;
+  if(kind === 'edit'){ return openNote(dir); }
   btn.disabled = true; const label = btn.textContent; btn.textContent = '处理中…';
   try{
     const r = await fetch(`/api/${kind}`, {method:'POST', headers:{'Content-Type':'application/json'},
@@ -132,6 +169,104 @@ const drop = $('#drop');
 ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev, e=>{e.preventDefault(); drop.classList.add('hot');}));
 ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev, e=>{e.preventDefault(); drop.classList.remove('hot');}));
 drop.addEventListener('drop', e => upload([...e.dataTransfer.files]));
+
+// ---------- 笔记预览与编辑 ----------
+let editing = null;
+
+function renderMd(src){
+  const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const inline = s => s
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>');
+  const L = esc(src).split('\n'), out = [];
+  let i = 0;
+  const isRow = r => /^\s*\|.*\|\s*$/.test(r);
+  const cells = r => r.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => inline(c.trim()));
+  while(i < L.length){
+    const ln = L[i];
+    if(/^\s*$/.test(ln)){ i++; continue; }
+    let m;
+    if((m = ln.match(/^(#{1,6})\s+(.*)$/))){
+      const h = Math.min(m[1].length + 2, 5);
+      out.push(`<h${h}>${inline(m[2])}</h${h}>`); i++; continue;
+    }
+    if(/^\s*([-*_]\s*){3,}$/.test(ln)){ out.push('<hr>'); i++; continue; }
+    if(/^\s*>/.test(ln)){
+      const b = [];
+      while(i < L.length && /^\s*>/.test(L[i])){ b.push(inline(L[i].replace(/^\s*>\s?/, ''))); i++; }
+      out.push('<blockquote>' + b.join('<br>') + '</blockquote>'); continue;
+    }
+    if(isRow(ln) && i + 1 < L.length && /^\s*\|[\s:|-]+\|\s*$/.test(L[i+1])){
+      const rows = [];
+      while(i < L.length && isRow(L[i])){ rows.push(L[i]); i++; }
+      const head = cells(rows[0]);
+      const body = rows.slice(2).map(cells);
+      out.push('<table><thead><tr>' + head.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>'
+        + body.map(r => '<tr>' + r.map(c => `<td>${c}</td>`).join('') + '</tr>').join('')
+        + '</tbody></table>');
+      continue;
+    }
+    if(/^\s*[-*]\s+/.test(ln)){
+      const it = [];
+      while(i < L.length && /^\s*[-*]\s+/.test(L[i])){ it.push(inline(L[i].replace(/^\s*[-*]\s+/, ''))); i++; }
+      out.push('<ul>' + it.map(x => `<li>${x}</li>`).join('') + '</ul>'); continue;
+    }
+    if(/^\s*\d+\.\s+/.test(ln)){
+      const it = [];
+      while(i < L.length && /^\s*\d+\.\s+/.test(L[i])){ it.push(inline(L[i].replace(/^\s*\d+\.\s+/, ''))); i++; }
+      out.push('<ol>' + it.map(x => `<li>${x}</li>`).join('') + '</ol>'); continue;
+    }
+    const para = [];
+    while(i < L.length && !/^\s*$/.test(L[i]) && !/^(#{1,6}\s|\s*[-*]\s|\s*\d+\.\s|\s*>|\s*\|)/.test(L[i])){
+      para.push(inline(L[i])); i++;
+    }
+    out.push('<p>' + para.join('<br>') + '</p>');
+  }
+  return out.join('\n');
+}
+
+async function openNote(dir){
+  editing = dir;
+  const r = await fetch('/api/note?course=' + encodeURIComponent(dir));
+  const j = await r.json();
+  if(!j.ok){ alert('打不开：' + j.error); return; }
+  $('#edTitle').textContent = dir + ' / 复习笔记.md';
+  $('#edText').value = j.content;
+  $('#edMeta').textContent = (j.content.length / 1000).toFixed(1) + 'k 字符';
+  $('#edMsg').textContent = '';
+  $('#edPreview').innerHTML = renderMd(j.content);
+  $('#editor').classList.add('open');
+  $('#editor').scrollIntoView({behavior:'smooth', block:'nearest'});
+  $('#edText').focus();
+}
+
+$('#edText').addEventListener('input', e => {
+  $('#edPreview').innerHTML = renderMd(e.target.value);
+  $('#edMeta').textContent = (e.target.value.length / 1000).toFixed(1) + 'k 字符';
+  $('#edMsg').textContent = '未保存';
+});
+
+async function saveNote(){
+  if(!editing) return;
+  const btn = $('#edSave'); btn.disabled = true; btn.textContent = '保存中…';
+  try{
+    const r = await fetch('/api/note', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({course: editing, content: $('#edText').value})});
+    const j = await r.json();
+    if(!j.ok){ alert('保存失败：' + j.error); return; }
+    $('#edMsg').textContent = `已保存（${j.bytes} 字节）`
+      + (j.stale && j.stale.length ? ` · 第 ${j.stale.join('、')} 讲 docx 已过期` : '');
+    await load();
+  } finally { btn.disabled = false; btn.textContent = '保存'; }
+}
+
+$('#edSave').onclick = saveNote;
+$('#edClose').onclick = () => { $('#editor').classList.remove('open'); editing = null; };
+document.addEventListener('keydown', e => {
+  if((e.metaKey || e.ctrlKey) && e.key === 's'){ e.preventDefault(); saveNote(); }
+});
+
 load();
 </script></body></html>
 """
@@ -202,6 +337,17 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, CONSOLE.encode("utf-8"), "text/html; charset=utf-8")
         elif self.path == "/api/state":
             self._json(scan(self.root))
+        elif self.path.startswith("/api/note?"):
+            from urllib.parse import parse_qs  # noqa: PLC0415
+            q = parse_qs(self.path.split("?", 1)[1])
+            d = self._course((q.get("course") or [""])[0])
+            if not d:
+                return self._json({"ok": False, "error": "课程无效"}, 400)
+            md = d / "复习笔记.md"
+            if not md.exists():
+                return self._json({"ok": False, "error": "缺 复习笔记.md"}, 404)
+            return self._json({"ok": True, "content": md.read_text(encoding="utf-8", errors="replace"),
+                               "mtime": md.stat().st_mtime})
         else:
             self._json({"error": "not found"}, 404)
 
@@ -222,6 +368,26 @@ class Handler(BaseHTTPRequestHandler):
             dest.write_bytes(data)
             lines = cw.extract_summary(dest, d / ".render" / "extract")
             return self._json({"ok": True, "lines": [f"{name} 已归档（{len(data)/1048576:.1f} MB）"] + lines})
+
+        if self.path == "/api/note":
+            n = int(self.headers.get("Content-Length", 0))
+            if n > 8 * 1024 * 1024:
+                return self._json({"ok": False, "error": "内容过大（上限 8 MB）"}, 413)
+            payload = json.loads(self.rfile.read(n) or b"{}")
+            d = self._course(payload.get("course", ""))
+            if not d:
+                return self._json({"ok": False, "error": "课程无效"}, 400)
+            content = payload.get("content")
+            if not isinstance(content, str):
+                return self._json({"ok": False, "error": "内容必须是字符串"}, 400)
+            md = d / "复习笔记.md"
+            tmp = md.with_suffix(".md.tmp")
+            tmp.write_text(content, encoding="utf-8")   # 先写临时文件再原子替换，避免写一半
+            os.replace(tmp, md)
+            # 保存后告诉前端：哪些讲的 docx 现在过期了
+            by_dir = {c["dir"]: c for c in scan(self.root)["courses"]}
+            stale = [x["m"] for x in by_dir.get(d.name, {"lectures": []})["lectures"] if x["stale"]]
+            return self._json({"ok": True, "bytes": len(content.encode("utf-8")), "stale": stale})
 
         if self.path in ("/api/notes", "/api/check"):
             n = int(self.headers.get("Content-Length", 0))

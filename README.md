@@ -82,7 +82,7 @@ cw check
 | `cw check [--fix]` | 同步检查（md 比 docx 新）＋ 缩写检查 |
 | `cw render <deck.pptx>` | LibreOffice 转 PDF，强制隔离用户配置目录 |
 | `cw ocr <图片>` | macOS 走 Vision（自动编译）；其他平台走 Tesseract |
-| `cw serve [--port 8765]` | 本地 Web 界面：拖入课件 → 提取 → 生成 docx → 检查（只监听 127.0.0.1） |
+| `cw serve [--port 8765]` | 本地 Web 界面：拖入课件 → 提取 → **预览/编辑笔记** → 生成 docx → 检查（只监听 127.0.0.1） |
 
 `--root` 写在子命令前后都可以：`cw --root X init` 与 `cw init --root X` 等价。
 工作区根目录的解析顺序：`--root` → `$POLYU_HOME` → `~/PolyU`。
