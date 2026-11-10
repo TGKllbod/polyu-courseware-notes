@@ -478,3 +478,29 @@ python3 scripts/embed_narration.py --verify <deck.pptx>      # 逐页核对旁�
 4. **根目录与课程目录分层**见 `docs/08-目录与归档.md`；分层之后，索引更要跟上。
 
 **一句话**：**没被索引的文件，等于不存在。**
+
+## 二十一、引用默认 APA 7（实践立规，用户明确要求）★
+
+> **触发**：幻灯片来源页、讲稿参考文献、笔记里的出处标注——**默认一律 APA 7**，不再用「机构 (年份), 题名」这类混合写法。
+
+**骨架**
+
+```
+作者. (年份). *题名* [类型]. 来源. URL
+```
+
+**六条细则**
+
+1. **作者用机构全称**：`Central Provident Fund Board.`，不写 `CPF Board (SG),`。
+2. **年份加括号**，有月日则写全：`(2023, July 12).`；查不到日期写 `(n.d.).`。
+3. **题名斜体**，冒号后首字母大写；**类型放方括号**：`[Data table]`、`[Press release]`、`[Report]`、`[Dataset]`、`[Conference paper]`。
+4. **数据表必须写表号**：`[Data table 174-05009]`——否则读者无法确认是哪一张。
+5. **非英语文献**：**英文译名作主标题**，方括号注原文与语种：
+   `Pensionsmyndigheten. (n.d.). *How you accrue your pension* [Swedish original: Så tjänar du in till din pension].`
+   （与 APA 原版「原文为主、译文为辅」相反，这里服从读者可读性；页脚须写明这条规则。）
+6. **页脚两行固定**：体例说明（`APA 7th. Titles are italicised…`）＋ `All links accessed <日期>`。
+
+**两条硬检查**
+
+- **每条 URL 必须实测**（至少浏览器可达）；机构域名会变（`ybj.sz.gov.cn` 打不开，实为 `hsa.sz.gov.cn`）——写之前先搜一次。
+- **同一页里体例必须统一**：出现一条 APA、一条中文式，就整页重排。
