@@ -504,3 +504,52 @@ python3 scripts/embed_narration.py --verify <deck.pptx>      # 逐页核对旁�
 
 - **每条 URL 必须实测**（至少浏览器可达）；机构域名会变（`ybj.sz.gov.cn` 打不开，实为 `hsa.sz.gov.cn`）——写之前先搜一次。
 - **同一页里体例必须统一**：出现一条 APA、一条中文式，就整页重排。
+
+## 二十二、讲稿不写交接句，收尾只写内容（实践立规，用户明确要求）★
+
+> **触发**：写演讲稿、逐页口播稿、展示脚本。
+
+**用户原话**：「不需要衔接部分，完全是画蛇添足，都去除掉，ppt 里也没有对应的衔接内容。」
+
+**禁止出现**
+
+| 类型 | 例子 |
+| --- | --- |
+| 谢上一位 | `Thank you, Yuxi.` / `谢谢你，Yuxi。` |
+| 预告下一位 | `Janice will take that up.` / `Yangqi 后面不会再重复。` |
+| 分工说明 | `这是我这一节，后面由 X 讲 Y` |
+| 章节导航 | `接下来我们进入第二部分`（PPT 上没有对应页时尤其不要） |
+
+**允许的收尾**：回扣论点、点出张力、留一句能被记住的话。例如
+“Singapore's strength — ownership — is also the source of its weakness at the bottom… **Neither is a free lunch.**”
+——讲的是**内容**，不是**流程**。
+
+**理由**：交接信息是**会议流程**，不是**论证**。写进稿子会占掉 10–20 秒，而这 10 秒本可以用来把一个数字说清楚；听众也不需要被告知“下一位是谁”，主持人会说。
+
+---
+
+## 二十三、段落开头不要用 3–6 词的断言式短句（实践立规）★
+
+> **触发**：任何要**念出来**的稿子（讲稿、口播稿、视频脚本）。
+
+**用户原话**：「部分段落开头还是短句，表达太机械，不够口语。」
+
+**问题形态**——段落以断言短句开场，读者听到的是一串“结论、结论、结论”，没有过渡：
+
+| 机械 | 口语 |
+| --- | --- |
+| `Three features matter.` | `Three things about it matter for our argument.` |
+| `Before the numbers, one definition.` | `Before we get to the numbers, let me give you one definition.` |
+| `Now the comparison.` | `So much for how the two systems work; now to the comparison.` |
+| `Here the systems diverge sharply.` | `This is where the two systems diverge most sharply.` |
+| `The design also carries a stabiliser.` | `The design also has a stabiliser built into it: …` |
+| `That is where the logic bites.` | `And that is where the logic starts to bite: …` |
+
+**四条改法**
+
+1. **补主语与语气词**：`Now the comparison` → `So much for X; now to Y`；
+2. **短句并进下一句**：用冒号／破折号把断言与其解释连起来，而不是断成两句；
+3. **允许口语标记**：`let me`、`you can see`、`what this means is`、`and that is where…`——书面语里可省，口播不可省；
+4. **一段只留一个断言**：开场句给方向，随后必须立刻给**内容**（数字、机制、例子），不要连着两句都在“报幕”。
+
+**检查方法**：把每段首句单独摘出来读——如果连着五段都是“X 是 Y。”这种 5 词句，就是机械了。
