@@ -122,6 +122,8 @@ def rule60(html, pdf, md, forced_file='.force_breaks'):
         print('  已记录强制换页：', sorted(forced), '—— 请用 handbook_html 重新生成 HTML 后重跑')
 
 def main():
+    if len(sys.argv) < 2:
+        print(__doc__); return
     cmd = sys.argv[1]
     if cmd == 'render': render(sys.argv[2], sys.argv[3])
     elif cmd == 'toc': toc(sys.argv[2], sys.argv[3], sys.argv[4])

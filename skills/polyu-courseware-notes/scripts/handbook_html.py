@@ -112,6 +112,8 @@ def table_html(rows):
     return ''.join(out) + '</tbody></table>'
 
 def main():
+    if len(sys.argv) < 3:
+        print(__doc__); return
     src, dst = sys.argv[1], sys.argv[2]
     flows = {}
     if '--flows' in sys.argv:
