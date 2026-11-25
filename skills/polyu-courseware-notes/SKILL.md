@@ -701,3 +701,20 @@ python3 scripts/embed_narration.py --verify <deck.pptx>      # 逐页核对旁�
 | 版本／时段 | 模型会更新，写清时段便于日后核查 |
 
 **若用户坚持窄口径声明**：唯一正当路径是把 AI 起草的段落**真正改写**为自己的表达（合上原文、用三行自记笔记重写），而不是改动声明文字。
+
+## 三十二、声明与说明类文字宜短，不要逐项量化（用户两次纠正）★★
+
+> 用户原话：「你不用画蛇添足，提到有用 ai 在翻译上就行了，不用详细说用多少，其他使用情况也是一样」。
+
+**规则**
+
+1. **AI 声明只写"用过什么、用在哪类事"**，不写"用了多少""用了哪几节""哪些是我自己做的"。
+2. 不要为了显得诚实而加一长串"我负全责"式的免责句——**两句足够**。
+3. 同类文字（方法说明、数据来源说明、局限）也一样，**点到即止**；用户要的是信息，不是自证。
+4. 写短的代价是可能被追问；但被追问时可以补充，写长了却收不回来。
+
+**推荐写法（本次采用）**
+
+> Generative AI tools (DeepSeek) were used in preparing this assessment, including for brainstorming, language editing and translation. I remain fully responsible for the content, the analysis and the accuracy of all references.
+
+**不要写成**：逐条列出①头脑风暴②语法③翻译④生成某几节初稿，再加三句"完全由本人完成"。
